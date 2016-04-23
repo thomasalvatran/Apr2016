@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <functional>
+#include <stack>
 
 using namespace std;
 
@@ -150,14 +151,20 @@ void mergeSort(int a[], int l, int r)
    merge(a, l, m, r);
 }
 
-/**********************Queue ADT Array *****************************/
-#ifdef INCLUDE //dummy
-    #include <iostream>
-    #include <stdio.h>
-    #include <vector>
-    #include <algorithm>
-#endif
-using namespace std;
+void isPrime(int n)
+{
+    int flag = 0, i;
+    for (i = 2; i <= n/2; i++)
+    {
+        flag = 0;
+        if (n % 2 == 0)
+        {
+            flag = 1;
+            break;
+        }
+    }
+    cout << (flag == 0 ? "Prime" : "Not Prime") << endl;
+}
 
 int factorial(int n)
 {
@@ -215,6 +222,15 @@ int fibocache(int i)
 }
 
 function<int(int)> fib = [](int x) { return x < 2 ? 1 : fib(x -1 ) + fib(x - 2);};
+
+/**********************Queue ADT Array *****************************/
+#ifdef INCLUDE //dummy
+    #include <iostream>
+    #include <stdio.h>
+    #include <vector>
+    #include <algorithm>
+#endif
+using namespace std;
 
 const int SIZE = 5;
 int Array[SIZE];
@@ -416,53 +432,48 @@ void insertNodeRef(BstNode **root, int data)
     }
 
 }
-//Method 3: Normal
+//Method 3: Normal pass by pointer in C
 BstNode* insertNode(BstNode *root, int data)
 {
-    BstNode *temp = root;
+    BstNode *temp = root, *prev = 0;
     if (root == NULL)
     {
         root = createNode(data);
         printf("Create root 1\n");
         return root;
     }
-    else if (data < root->data)
+
+    while (temp)
     {
-        while (temp->left != 0)  
-            temp = temp->left;
+        prev = temp;  
         if (data < temp->data)
-            temp->left = createNode(data);
+          temp = temp->left;
         else
-            temp->right = createNode(data);
-    }
-    else if (data > root->data)
-    {
-        while (temp->right != 0)
-        {
-            temp = temp->right;
-        }
-        if (data < temp->data)
-            temp->left = createNode(data);
-        else
-            temp->right = createNode(data);
-    }
+          temp = temp->right;
+    }  
+    if (data < prev->data)
+        prev->left = createNode(data);
+    else
+        prev->right = createNode(data);
+
     return root;
 }
 //Method 4: recursive
-BstNode* insertNodeRecursive(BstNode* root, int data)
+BstNode* insertNodeRecursive(BstNode *root, int data)
 {
     if (root == NULL)
     {
         root = createNode(data);
-        printf("Create root 2\n");
+        printf("Create root 1\n");
         return root;
     }
-    else if (data < root->data)
+    if (data <= root->data)
         root->left = insertNodeRecursive(root->left, data);
-    else
+    else 
         root->right = insertNodeRecursive(root->right, data);
     return root;
 }
+
 
 void printTree(BstNode *root)
 {
@@ -472,6 +483,23 @@ void printTree(BstNode *root)
         printf("%d ", root->data);
         printTree(root->right);
     }
+}
+//printTree using stack
+void in_order_traversal_iterative(BstNode *root) {
+  stack<BstNode*> s;
+  BstNode *current = root;
+  while (!s.empty() || current) 
+  {
+    if (current) {
+      s.push(current);
+      current = current->left;
+    } else {
+      current = s.top();
+      s.pop();
+      cout << current->data << " ";
+      current = current->right;
+    }
+  }
 }
 
 BstNode* deleteTree(BstNode* root)
@@ -731,6 +759,7 @@ void sortArray(int a[])
 
 int main()
 {
+    isPrime(4);
     cout << "Factorial(4) " << factorial(4) << endl;
     cout << "Fibonacci(5) " << fibonacci(5) << endl;
     cout <<  "*********** Sorting ***********" << endl;
