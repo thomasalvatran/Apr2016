@@ -345,91 +345,96 @@ BstNode* enqueueTree(BstNode *root, int data)
     root = insertNode(root, data);
     return root;
 }
-BstNode* dequeueMinTree(BstNode* root)
+BstNode* dequeueMinTree(BstNode* root) //smallest in balance tree
 {
-    BstNode *temp = root;
-    if (root == NULL)
-        return root;
-    while (temp->left->left != NULL)
+     BstNode *temp = root, *prev;
+   if (root == NULL || root ->left == 0)
+      return root;
+   
+    while (temp->left != 0) //check last node
+    {
+        prev = temp;
         temp = temp->left;
-
-    delete temp->left;
-    temp->left = NULL; //end of left node
+    }
+    if (temp->left == 0 && temp->right == 0) // no left no right
+    {    
+        delete temp;                  //delete node
+        prev->left = 0;               //cut the link
+    }
+    else if (temp->left != 0)         //has left
+    {
+        delete temp->left;          
+        prev->left->left = 0;
+    }
+    else if (temp->right != 0)         //has right
+    {
+        delete temp->right;
+        prev->left->right = 0;
+    }
     return root;
 }
 
 BstNode* dequeueMaxTree(BstNode *root)
 {
+    BstNode *temp = root, *prev = 0;
     if (root == NULL)
         return root;
-    BstNode *temp = root;
-    while (temp->right->right != NULL)
+    while (temp->right != NULL)
     {
+        prev = temp;
         temp = temp->right;
     }
-    delete temp->right;
-    temp->right = NULL; //set to none cut link
+    delete temp;
+    prev->right = NULL; //set to none cut link
     return root;
 }
 
 //Method 1: use global root
 void insertNodeGlobal(int data)
 {
-    BstNode *temp = root;
+    BstNode *temp = root, *prev = 0;
     if (root == NULL)
     {
         root = createNode(data);
         printf("Create root\n");
         return;
     }
-    else if (data < (root)->data)
+    while (temp)
     {
-        while (temp->left != 0)
+        prev = temp;
+        if (data < temp->data)
             temp = temp->left;
-        if (data < temp->data)
-            temp->left = createNode(data);
         else
-            temp->right = createNode(data);
-    }
-    else if (data > (root)->data)
-    {
-        while (temp->right != 0)
             temp = temp->right;
-        if (data < temp->data)
-            temp->left = createNode(data);
-        else
-            temp->right = createNode(data);
     }
+    if (data < prev->data)
+        prev->left = createNode(data);
+    else
+        prev->right = createNode(data);
 
 }
 //Method 2 use reference
 void insertNodeRef(BstNode **root, int data)
 {
-    BstNode *temp = *root;
+    BstNode *temp = *root, *prev = 0;
     if (*root == NULL)
     {
         *root = createNode(data);
         printf("Create root\n");
         return;
     }
-    else if (data < (*root)->data)
+    while (temp)
     {
-        while (temp->left != 0)
+        prev = temp;
+        if (data < temp->data)
             temp = temp->left;
-        if (data < temp->data)
-            temp->left = createNode(data);
         else
-            temp->right = createNode(data);
-    }
-    else if (data > (*root)->data)
-    {
-        while (temp->right != 0)
             temp = temp->right;
-        if (data < temp->data)
-            temp->left = createNode(data);
-        else
-            temp->right = createNode(data);
     }
+    if (data < prev->data)
+        prev->left = createNode(data);
+    else
+        prev->right = createNode(data);
 
 }
 //Method 3: Normal pass by pointer in C
@@ -443,9 +448,9 @@ BstNode* insertNode(BstNode *root, int data)
         return root;
     }
 
-    while (temp)
+    while (temp)                  // find empty tree
     {
-        prev = temp;  
+        prev = temp;              //store prev tree
         if (data < temp->data)
           temp = temp->left;
         else
@@ -539,61 +544,54 @@ int findMin(BstNode *root)
     return temp->data;
 }
 
-
-BstNode* findMinMaxNodeLeftOrRight(BstNode* root, int LorR)
+BstNode* findMinNode(BstNode *root)
 {
-    if (LorR)
+    BstNode *temp = root;
+    if (root == NULL)
     {
-        while (root->right != NULL)
-            root = root->right;
-    } else {
-        while (root->left != NULL)
-            root = root->left;
+        printf("Tree is empty\n");
+        return 0;
     }
-    return root;
+    while (temp->left != NULL)
+        temp = temp->left;
+    return temp;
 }
 
 BstNode* removeNode(BstNode* root, int data)
 {
     if (root == NULL)
         return root;
-    else if (data < root->data)
+    if (data < root->data)
         root->left = removeNode(root->left, data);
-    else if (data > root->data)
-        root->right = removeNode(root->right, data);
+    else if (data > root->data) 
+        root->right = removeNode (root->right, data);
     else
-    { // 3 cases
+    {
         if (root->left == NULL && root->right == NULL)
         {
             delete root;
-            root = NULL;
+            return NULL;
         }
         else if (root->left == NULL)
         {
-            BstNode *temp = root;
+            BstNode* temp = root;
             root = root->right;
             delete temp;
         }
         else if (root->right == NULL)
         {
-            BstNode *temp = root;
+            BstNode* temp = root;
             root = root->left;
             delete temp;
         }
         else
         {
-            int LorR;
-            if (data > root->data)
-            {
-                LorR = 1;
-                BstNode *temp = findMinMaxNodeLeftOrRight(root->right, LorR);
-                root->right = removeNode(root->right, temp->data);
-            }else{
-                LorR = 0;
-                BstNode *temp = findMinMaxNodeLeftOrRight(root->left, LorR);
-                root->left = removeNode(root->left, temp->data);
-            }
+            BstNode *temp = findMinNode(root->right); //find min in right subtree
+            // temp->data = findMax(root->left);   // find max in left subtree
+            root->data = temp->data;
+            root->right = removeNode(root->right, temp->data);
         }
+
     }
     return root;
 }
@@ -616,7 +614,7 @@ int binsearch(int x, vector<int> v, int n)
     {
         mid = (low + high) / 2;
         if ( x < v[mid])
-            high = mid + 1;
+            high = mid - 1;
         else if (x > v[mid])
             low = mid + 1;
         else
@@ -818,6 +816,7 @@ int main()
     root = enqueueTree(root, 555);
     printTree(root);
     printf("\n");
+    dequeueMinTree(root);
     dequeueMinTree(root);
     printTree(root);
     printf("\n");
