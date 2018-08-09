@@ -345,7 +345,7 @@ BstNode* enqueueTree(BstNode *root, int data)
     root = insertNode(root, data);
     return root;
 }
-BstNode* dequeueMinTree(BstNode* root) //smallest in balance tree
+BstNode* dequeueMinTree(BstNode* root) //smallest in balance tree Aug 8, 2018
 {
      BstNode *temp = root, *prev;
    if (root == NULL || root ->left == 0)
